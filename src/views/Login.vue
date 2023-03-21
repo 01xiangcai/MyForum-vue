@@ -32,8 +32,8 @@
     data() {
       return {
         ruleForm: {
-          username: 'markerhub',
-          password: '111111'
+          username: 'string',
+          password: 'string'
         },
         rules: {
           username: [
