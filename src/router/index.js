@@ -4,6 +4,10 @@ import Login from '../views/Login.vue'
 import Blogs from '../views/Blogs.vue'
 import BlogEdit from '../views/BlogEdit.vue'
 import BlogDetail from '../views/BlogDetail.vue'
+import Article from '../views/Article.vue'
+import Questions from '../views/Questions'
+import QuestionEdit from '../views/question/QuestionEdit'
+import QuestionDetail from '../views/question/QuestionDetail'
 
 Vue.use(VueRouter)
 
@@ -18,6 +22,40 @@ const routes = [
     name: 'Blogs',
     component: Blogs
   },
+  {
+    path: '/article',
+    name: 'Article',
+    component: Article
+  },
+  {
+    path: '/questions',
+    name: 'questions',
+    component: Questions
+  },
+  {
+    path: '/question/add',
+    name: '/QuestionAdd',
+    component: QuestionEdit,
+    meta: {
+      requireAuth: true
+    }
+  },
+  {
+    path: '/question/:questionId',
+    name: 'QuestionDetail',
+    component: QuestionDetail
+  },
+  {
+    path: '/question/:questionId/edit',
+    name: 'QuestionEdit',
+    component: QuestionEdit,
+    meta: {
+      requireAuth: true
+    }
+  },
+
+
+
   {
     path: '/login',
     name: 'Login',
