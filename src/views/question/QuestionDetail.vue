@@ -47,13 +47,36 @@
                 >
               </div>
             </div>
+            <el-divider></el-divider>
 
             <div>
               <h3>热门评论</h3>
-            </div>
+              <div v-for="comment in getcomments" :key="comment.id">
+                <div>
+                  <el-avatar
+                    shape="circle"
+                    :size="30"
+                    :fit="fit"
+                    :src="comment.avatar"
+                    style="display: inline-block; vertical-align: middle"
+                  ></el-avatar>
+                  <span style="display: inline-block; vertical-align: middle"
+                    >{{ comment.username }}
+                  </span>
+                  <spqn class="gmtCreate">{{ comment.gmtCreate }}</spqn>
+                  <p>{{ comment.content }}</p>
 
-            <!-- 回到顶部 -->
-            <el-divider></el-divider>
+                  <i class="el-icon-sugar" style="margin-right: 10px">{{
+                    comment.likeCount
+                  }}</i>
+
+                  <i class="el-icon-chat-dot-square">{{
+                    comment.commentCount
+                  }}</i>
+                </div>
+                <el-divider></el-divider>
+              </div>
+            </div>
           </div>
         </div>
       </el-col>
@@ -79,6 +102,7 @@
         </div>
       </el-col>
     </div>
+    <!-- 回到顶部 -->
     <el-backtop></el-backtop>
   </div>
 </template>
@@ -113,8 +137,12 @@ export default {
         commentator: "",
         content: "",
       },
+      getcomments: {},
+
+      //   评论输入框信息
       comments: "",
       ownBlog: false,
+      visible: false,
     };
   },
   methods: {
@@ -130,17 +158,32 @@ export default {
           },
         })
         .then((res) => {
-          console.log(res);
+          this.showComments(this.question.id);
+
           _this.$alert("评论成功", "提示", {
             confirmButtonText: "确定",
           });
+          this.comments = "";
         });
     },
+
+    showComments(parentId) {
+      const _this = this;
+      const type = 1;
+      this.$axios
+        .get("comment/commentList", { params: { parentId, type } })
+        .then((res) => {
+          _this.getcomments = res.data.data;
+          
+        });
+    },
+
+    
   },
 
   created() {
     const questionId = this.$route.params.questionId;
-
+    const parentId = questionId;
     const _this = this;
     this.$axios
       .get("/question/question/" + questionId)
@@ -171,6 +214,8 @@ export default {
           confirmButtonText: "确定",
         });
       });
+
+    this.showComments(parentId);
   },
 };
 </script>
@@ -213,5 +258,11 @@ export default {
 .submit {
   /* float: right; */
   margin-top: 10px;
+}
+
+.gmtCreate {
+  float: right;
+  font-size: 12px;
+  padding-top: 8px;
 }
 </style>
