@@ -8,6 +8,9 @@ import Article from '../views/Article.vue'
 import Questions from '../views/Questions'
 import QuestionEdit from '../views/question/QuestionEdit'
 import QuestionDetail from '../views/question/QuestionDetail'
+import ArticleEdit from '../views/article/ArticleEdit'
+import ArticleDetail from '../views/article/ArticleDetail'
+
 
 Vue.use(VueRouter)
 
@@ -40,11 +43,28 @@ const routes = [
       requireAuth: true
     }
   },
+
+  {
+    path: '/article/add',
+    name: '/ArticleAdd',
+    component: ArticleEdit,
+    meta: {
+      requireAuth: true
+    }
+  },
+
   {
     path: '/question/:questionId',
     name: 'QuestionDetail',
     component: QuestionDetail
   },
+
+  {
+    path: '/aticle/:articleId',
+    name: 'AticleDetail',
+    component: ArticleDetail
+  },
+
   {
     path: '/question/:questionId/edit',
     name: 'QuestionEdit',
@@ -81,7 +101,10 @@ const routes = [
     meta: {
       requireAuth: true
     }
-  }
+  },
+
+
+
 ]
 
 const router = new VueRouter({

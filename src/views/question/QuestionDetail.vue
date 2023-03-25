@@ -171,14 +171,11 @@ export default {
       const _this = this;
       const type = 1;
       this.$axios
-        .get("comment/commentList", { params: { parentId, type } })
+        .get("/comment/commentList", { params: { parentId, type } })
         .then((res) => {
           _this.getcomments = res.data.data;
-          
         });
     },
-
-    
   },
 
   created() {

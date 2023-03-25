@@ -1,13 +1,12 @@
 <template>
   <el-header>
     <el-menu
-      :default-active="activeIndex2"
+      :default-active="$route.path"
       class="el-menu-demo"
       mode="horizontal"
-      @select="handleSelect"
-      background-color="#545c64"
+      background-color="#d0c7db"
       text-color="#fff"
-      active-text-color="#ffd04b"
+      active-text-color="#409EFF"
       id="menu"
       :router="true"
     >
@@ -16,11 +15,13 @@
       <el-menu-item index="/questions">问答</el-menu-item>
 
       <el-menu-item index="4" disabled>消息中心</el-menu-item>
-      <el-menu-item index="/login" v-show="!hasLogin">{{ user.username }}</el-menu-item>
+      <el-menu-item index="/login" v-show="!hasLogin">{{
+        user.username
+      }}</el-menu-item>
 
       <el-submenu index="6" v-show="hasLogin">
         <template slot="title">发布</template>
-        <el-menu-item index="6-1">发布文章</el-menu-item>
+        <el-menu-item index="/article/add">发布文章</el-menu-item>
         <el-menu-item index="/question/add">发布问题</el-menu-item>
       </el-submenu>
 
@@ -30,8 +31,6 @@
         <el-menu-item index="2-2">我的文章</el-menu-item>
         <el-menu-item index="2-3" @click="logout">退出登录 </el-menu-item>
       </el-submenu>
-     
-
     </el-menu>
   </el-header>
 </template>
@@ -46,8 +45,15 @@ export default {
         username: "请先登录",
       },
       hasLogin: false,
+      activeIndex: "",
     };
   },
+
+//   watch: {
+//     $router() {
+//       this.handleSelect(this.activeIndex);
+//     },
+//   },
 
   methods: {
     logout() {
@@ -63,6 +69,9 @@ export default {
           _this.$router.push("/login");
         });
     },
+    // handleSelect(index) {
+    //   this.activeIndex = index;
+    // },
   },
 
   created() {
@@ -80,8 +89,10 @@ export default {
 
 <style scoped>
 .el-header {
-  background-color: #545c64;
-  color: #333;
-  line-height: 60px;
+  /* background-color: #545c64; */
+  background-color: #d0c7db;
+
+  /* color: #333; */
+  /* line-height: 60px; */
 }
 </style>

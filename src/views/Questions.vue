@@ -21,6 +21,7 @@
               </h5>
               <h4>
                 <router-link
+                 
                   :to="{
                     name: 'QuestionDetail',
                     params: { questionId: question.id },
@@ -55,13 +56,12 @@
       <el-col :xs="6" :sm="6" :md="6" :lg="6" :xl="6" :push="1">
         <div>
           <div class="right">
-            <el-carousel  indicator-position="none">
+            <el-carousel indicator-position="none">
               <el-carousel-item v-for="item in 4" :key="item" class="carousel">
                 <h3>{{ item }}</h3>
               </el-carousel-item>
             </el-carousel>
           </div>
-
         </div>
       </el-col>
     </el-main>
@@ -92,12 +92,29 @@ export default {
         .get("/question/questions?currentPage=" + currentPage)
         .then((res) => {
           _this.questions = res.data.data.questionRecords;
+          console.log(
+            "_this.questions======================>",
+            _this.questions
+          );
           _this.currentPage = res.data.data.currentPage;
           _this.total = res.data.data.total;
           _this.pageSize = res.data.data.pageSize;
         });
     },
+
+    increaseView(id) {
+      const _this = this;
+      console.log("id----------------------------", id);
+      _this.$axios
+        .get("/question/increaseView", { params: { id } })
+        .then((res) => {
+          console.log(res);
+        });
+    },
+
+    
   },
+
   created() {
     this.page(1);
   },
@@ -111,6 +128,8 @@ export default {
       return value;
     },
   },
+
+  
 };
 </script>
 
@@ -148,9 +167,8 @@ export default {
   color: #475669;
   font-size: 18px;
   opacity: 0.75;
-  line-height:230px;
+  line-height: 230px;
   margin: 0;
-  
 }
 
 .el-carousel__item:nth-child(2n) {
@@ -161,8 +179,7 @@ export default {
   background-color: #d3dce6;
 }
 
-.carousel{
-   height: 230px;
+.carousel {
+  height: 230px;
 }
-
 </style>

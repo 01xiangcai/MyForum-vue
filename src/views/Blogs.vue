@@ -2,6 +2,8 @@
   <div class="mcontaner">
     <Header2></Header2>
     <div style="padding-bottom: 20px"></div>
+
+<!-- 主体部分 -->
     <div class="block">
       <el-timeline>
         <el-timeline-item
@@ -35,6 +37,9 @@
       >
       </el-pagination>
     </div>
+
+
+
     <div class="container-footer">
       <Footer></Footer>
     </div>
