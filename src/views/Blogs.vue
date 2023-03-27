@@ -40,9 +40,11 @@
 
 
 
-    <div class="container-footer">
+    <!-- <div class="container-footer">
       <Footer></Footer>
-    </div>
+    </div> -->
+    <!-- 回到顶部 -->
+    <el-backtop title="回到顶部" :bottom="220"></el-backtop>
   </div>
 </template>
 

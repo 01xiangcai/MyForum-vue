@@ -8,8 +8,10 @@ import Article from '../views/Article.vue'
 import Questions from '../views/Questions'
 import QuestionEdit from '../views/question/QuestionEdit'
 import QuestionDetail from '../views/question/QuestionDetail'
+import MyQuestion from '../views/question/MyQuestion'
 import ArticleEdit from '../views/article/ArticleEdit'
 import ArticleDetail from '../views/article/ArticleDetail'
+import MyArticle from '../views/article/MyArticle'
 
 
 Vue.use(VueRouter)
@@ -34,6 +36,16 @@ const routes = [
     path: '/questions',
     name: 'questions',
     component: Questions
+  },
+  {
+    path: '/myQuestions',
+    name: 'MyQuestion',
+    component: MyQuestion
+  },
+  {
+    path: '/myArticles',
+    name: 'MyArticle',
+    component: MyArticle
   },
   {
     path: '/question/add',
@@ -61,7 +73,7 @@ const routes = [
 
   {
     path: '/aticle/:articleId',
-    name: 'AticleDetail',
+    name: 'ArticleDetail',
     component: ArticleDetail
   },
 
@@ -69,6 +81,14 @@ const routes = [
     path: '/question/:questionId/edit',
     name: 'QuestionEdit',
     component: QuestionEdit,
+    meta: {
+      requireAuth: true
+    }
+  },
+  {
+    path: '/article/:articleId/edit',
+    name: 'ArticleEdit',
+    component: ArticleEdit,
     meta: {
       requireAuth: true
     }

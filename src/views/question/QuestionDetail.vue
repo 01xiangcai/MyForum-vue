@@ -20,6 +20,7 @@
           <el-divider></el-divider>
           <div class="markdown-body" v-html="question.description"></div>
 
+          <el-divider></el-divider>
           <div>
             <h3>评论</h3>
             <div style="display: flex; flex-direction: column">
@@ -27,7 +28,7 @@
                 ><el-avatar
                   shape="circle"
                   :size="60"
-                  :fit="fit"
+                  :fit="fill"
                   :src="currentUser.avatar"
                   style="display: inline-block; vertical-align: middle"
                 ></el-avatar
@@ -56,7 +57,7 @@
                   <el-avatar
                     shape="circle"
                     :size="30"
-                    :fit="fit"
+                    :fit="fill"
                     :src="comment.avatar"
                     style="display: inline-block; vertical-align: middle"
                   ></el-avatar>
@@ -87,7 +88,7 @@
             <el-avatar
               shape="square"
               :size="100"
-              :fit="fit"
+              :fit="fill"
               :src="user.avatar"
               style="display: inline-block; vertical-align: middle"
             ></el-avatar>
@@ -103,7 +104,7 @@
       </el-col>
     </div>
     <!-- 回到顶部 -->
-    <el-backtop></el-backtop>
+    <el-backtop title="回到顶部" :bottom="220"></el-backtop>
   </div>
 </template>
 
@@ -176,6 +177,16 @@ export default {
           _this.getcomments = res.data.data;
         });
     },
+
+    increaseView(id) {
+      const _this = this;
+      console.log("增加阅读数id----------------------------", id);
+      _this.$axios
+        .get("/question/increaseView", { params: { id } })
+        .then((res) => {
+          console.log(res);
+        });
+    },
   },
 
   created() {
@@ -189,6 +200,7 @@ export default {
         _this.question.id = question.id;
         _this.question.title = question.title;
         _this.comment.parentId = question.id;
+        this.increaseView(question.id);
 
         var MardownIt = require("markdown-it");
         var md = new MardownIt();

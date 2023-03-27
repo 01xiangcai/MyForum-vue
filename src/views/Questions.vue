@@ -21,11 +21,10 @@
               </h5>
               <h4>
                 <router-link
-                 
                   :to="{
                     name: 'QuestionDetail',
                     params: { questionId: question.id },
-                  }"
+                  }"                
                 >
                   {{ question.title }}
                 </router-link>
@@ -65,9 +64,11 @@
         </div>
       </el-col>
     </el-main>
-    <div class="container-footer">
+    <!-- <div class="container-footer">
       <Footer></Footer>
-    </div>
+    </div> -->
+    <!-- 回到顶部 -->
+    <el-backtop title="回到顶部" :bottom="220" ></el-backtop>
   </div>
 </template>
 
@@ -85,6 +86,9 @@ export default {
       pageSize: 5,
     };
   },
+
+
+
   methods: {
     page(currentPage) {
       const _this = this;
@@ -92,28 +96,18 @@ export default {
         .get("/question/questions?currentPage=" + currentPage)
         .then((res) => {
           _this.questions = res.data.data.questionRecords;
-          console.log(
-            "_this.questions======================>",
-            _this.questions
-          );
+      
           _this.currentPage = res.data.data.currentPage;
           _this.total = res.data.data.total;
           _this.pageSize = res.data.data.pageSize;
         });
     },
 
-    increaseView(id) {
-      const _this = this;
-      console.log("id----------------------------", id);
-      _this.$axios
-        .get("/question/increaseView", { params: { id } })
-        .then((res) => {
-          console.log(res);
-        });
-    },
-
     
+   
   },
+
+
 
   created() {
     this.page(1);
@@ -128,8 +122,6 @@ export default {
       return value;
     },
   },
-
-  
 };
 </script>
 

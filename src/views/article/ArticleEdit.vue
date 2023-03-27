@@ -36,7 +36,7 @@
 <script>
   import Header2 from "@/components/Header2";
   export default {
-    name: "QuetionEdit.vue",
+    name: "ArticleEdit.vue",
     components: {Header2},
     data() {
       return {

@@ -7,35 +7,27 @@
         <div>
           <div v-for="article in articles" :key="article.id">
             <el-card style="text-align: left">
-              <!-- 头像，名字，创建时间信息 -->
-              <h5>
-                <span style="display: inline-block; vertical-align: middle"
-                  ><el-avatar
-                    size="100"
-                    :fit="fill"
-                    :src="article.creator_avatar"
-                  ></el-avatar
-                ></span>
-                <span style="display: inline-block; vertical-align: middle"
-                  >{{ article.creator_name }} | {{ article.gmtCreate }}</span
-                >
-              </h5>
-
               <h4>
                 <router-link
-                  :to="{ name: 'ArticleDetail', params: {articleId: article.id } }"
+                  :to="{
+                    name: 'ArticleDetail',
+                    params: { articleId: article.id },
+                  }"
                 >
-                {{ article.title }}
+                  {{ article.title }}
                 </router-link>
               </h4>
               <p>{{ article.description | limitText }}</p>
-
               <i class="el-icon-view" style="margin-right: 10px">{{
                 article.viewCount
               }}</i>
-              <i class="el-icon-chat-dot-square">{{ article.commentCount }}</i>
+              <i class="el-icon-chat-dot-square" style="margin-right: 10px">{{
+                article.commentCount
+              }}</i>
+              时间:{{ article.gmtCreate }}
             </el-card>
           </div>
+
           <div style="padding-bottom: 10px"></div>
 
           <el-pagination
@@ -46,30 +38,25 @@
             :page-size="pageSize"
             :total="total"
             @current-change="page"
-            >>
+          >
           </el-pagination>
         </div>
-      </el-col>
-
-      <el-col :xs="6" :sm="6" :md="6" :lg="6" :xl="6" :push="1">
-        <div id="left">3</div>
       </el-col>
     </el-main>
     <!-- <div class="container-footer">
       <Footer></Footer>
     </div> -->
-
     <!-- 回到顶部 -->
     <el-backtop title="回到顶部" :bottom="220"></el-backtop>
   </div>
 </template>
 
 <script>
-import Header2 from "../components/Header2";
-import Footer from "../components/Footer";
+import Header2 from "@/components/Header2";
+
 export default {
-  name: "Article.vue",
-  components: { Header2, Footer },
+  name: "MyQuestion.vue",
+  components: { Header2 },
   data() {
     return {
       articles: {},
@@ -78,22 +65,27 @@ export default {
       pageSize: 5,
     };
   },
+
   methods: {
-    page(currentPage) {
+    page(currentPage, pageSize) {
       const _this = this;
+      const userId = _this.$store.getters.getUser.id;
       _this.$axios
-        .get("/article/articleList?currentPage=" + currentPage)
+        .get("/article//articleByUserId", {
+          params: { userId, currentPage, pageSize },
+        })
         .then((res) => {
-          console.log(res);
-          _this.articles = res.data.data.articleRecords;
-          _this.currentPage = res.data.data.currentPage;
+          _this.articles = res.data.data.records;
+
+          _this.currentPage = res.data.data.current;
           _this.total = res.data.data.total;
-          _this.pageSize = res.data.data.pageSize;
+          _this.pageSize = res.data.data.size;
         });
     },
   },
+
   created() {
-    this.page(1);
+    this.page(1, 5);
   },
 
   filters: {
@@ -130,5 +122,31 @@ export default {
   height: 100%; /* 设置高度为容器高度 */
   display: flex;
   flex-direction: column;
+}
+
+.right {
+  width: 350px;
+  height: 230px;
+}
+
+/* 走马灯 */
+.el-carousel__item h3 {
+  color: #475669;
+  font-size: 18px;
+  opacity: 0.75;
+  line-height: 230px;
+  margin: 0;
+}
+
+.el-carousel__item:nth-child(2n) {
+  background-color: #99a9bf;
+}
+
+.el-carousel__item:nth-child(2n + 1) {
+  background-color: #d3dce6;
+}
+
+.carousel {
+  height: 230px;
 }
 </style>
