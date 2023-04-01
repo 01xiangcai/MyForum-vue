@@ -15,17 +15,18 @@
         <el-menu-item index="/article">文章</el-menu-item>
         <el-menu-item index="/questions">问答</el-menu-item>
 
-        <el-menu-item index="4" disabled>消息中心</el-menu-item>
-        <el-menu-item index="/login" v-show="!hasLogin">{{
-          user.username
-        }}</el-menu-item>
-
         <el-submenu index="6" v-show="hasLogin">
           <template slot="title">发布</template>
           <el-menu-item index="/article/add">发布文章</el-menu-item>
           <el-menu-item index="/question/add">发布问题</el-menu-item>
         </el-submenu>
 
+        <el-menu-item index="/myTest">测试页面</el-menu-item>
+
+        <!-- 用户是否登录，用户信息 -->
+        <el-menu-item index="/login" v-show="!hasLogin" style="float: right">{{
+          user.username
+        }}</el-menu-item>
         <el-submenu index="5" v-show="hasLogin" style="float: right">
           <template slot="title"
             ><el-avatar :src="user.avatar" :fit="fill"></el-avatar
@@ -37,6 +38,50 @@
           <el-menu-item index="/myQuestions">我的问题</el-menu-item>
           <el-menu-item index="2-3" @click="logout">退出登录 </el-menu-item>
         </el-submenu>
+
+
+        <!-- 通知按钮 -->
+        <el-submenu index="7" style="float: right">
+          <template slot="title">
+            <i class="el-icon-message-solid" style="position: relative"
+              ><el-badge
+                :value="200"
+                :max="99"
+                class="item"
+                style="position: absolute; top: -20px"
+              ></el-badge
+            ></i>
+          </template>
+
+          <el-menu-item index="/commentNotification"
+            >回复<el-badge
+              :value="200"
+              :max="99"
+              class="item"
+              style="position: absolute; top: -20px"
+            ></el-badge
+          ></el-menu-item>
+          <el-menu-item index=""
+            >私信<el-badge
+              :value="0"
+              :max="99"
+              class="item"
+              style="position: absolute; top: -20px"
+              hidden="true"
+            ></el-badge
+          ></el-menu-item>
+          <el-menu-item index=""
+            >通知<el-badge
+              :value="0"
+              :max="99"
+              class="item"
+              style="position: absolute; top: -20px"
+              hidden="true"
+            ></el-badge
+          ></el-menu-item>
+        </el-submenu>
+
+
       </el-menu>
     </div>
   </el-header>
@@ -107,5 +152,9 @@ export default {
 }
 .el-menu {
   width: 100%;
+}
+.item {
+  margin-top: 10px;
+  margin-right: 40px;
 }
 </style>

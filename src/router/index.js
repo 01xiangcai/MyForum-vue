@@ -12,6 +12,9 @@ import MyQuestion from '../views/question/MyQuestion'
 import ArticleEdit from '../views/article/ArticleEdit'
 import ArticleDetail from '../views/article/ArticleDetail'
 import MyArticle from '../views/article/MyArticle'
+import CommentNotification from '../views/Notification/CommentNotification'
+
+import MyTestIndex from '../views/test/MyTestIndex'
 
 
 Vue.use(VueRouter)
@@ -47,6 +50,22 @@ const routes = [
     name: 'MyArticle',
     component: MyArticle
   },
+
+  {
+    path: '/commentNotification',
+    name: 'CommentNotification',
+    component: CommentNotification
+  },
+
+  {
+    path: '/myTest',
+    name: 'MyTestIndex',
+    component: MyTestIndex
+  },
+
+
+
+
   {
     path: '/question/add',
     name: '/QuestionAdd',
