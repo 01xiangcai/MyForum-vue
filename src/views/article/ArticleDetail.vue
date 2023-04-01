@@ -5,22 +5,23 @@
       <div style="padding-bottom: 20px"></div>
 
       <el-col :xs="17" :sm="17" :md="17" :lg="17" :xl="17" :push="1">
-        <div class="questionDetail">
-          <h2>{{ question.title }}</h2>
+        <div class="articleDetail">
+          <h2>{{ article.title }}</h2>
           <el-link icon="el-icon-edit" v-if="ownBlog">
             <router-link
               :to="{
-                name: 'QuestionEdit',
-                params: { questionId: question.id },
+                name: 'ArticleEdit',
+                params: { articleId: article.id },
               }"
             >
               编辑
             </router-link>
           </el-link>
           <el-divider></el-divider>
-          <div class="markdown-body" v-html="question.description"></div>
+          <div class="markdown-body" v-html="article.description"></div>
 
           <el-divider></el-divider>
+
           <div>
             <h3>评论</h3>
             <div style="display: flex; flex-direction: column">
@@ -71,10 +72,65 @@
                     comment.likeCount
                   }}</i>
 
-                  <i class="el-icon-chat-dot-square">{{
-                    comment.commentCount
-                  }}</i>
+                  <i
+                    class="el-icon-chat-dot-square"
+                    @click="showSubComments(comment.id)"
+                    :title="'评论'"
+                    style="cursor: pointer"
+                    >{{ comment.commentCount }}</i
+                  >
                 </div>
+
+                <!-- 二级评论列表 -->
+                <div
+                  v-if="showSub && cuentCommentParentId == comment.id"
+                  style="
+                    width: 80%;
+                    margin-left: 80px;
+                    background: rgb(248 243 247);
+                  "
+                >
+                  <el-input
+                    type="textarea"
+                    :autosize="{ minRows: 2 }"
+                    placeholder="请输入内容"
+                    v-model="subInPutComment"
+                    style="margin-bottom: 20px"
+                  >
+                  </el-input>
+                  <div style="display: flex; justify-content: flex-end">
+                    <el-button
+                      type="primary"
+                      round
+                      @click="submitSubComment(subInPutComment)"
+                      >发表评论</el-button
+                    >
+                  </div>
+                  <el-divider></el-divider>
+                  <div v-for="subComment in subComments" :key="subComment.id">
+                    <div>
+                      <el-avatar
+                        shape="circle"
+                        :size="30"
+                        :fit="fill"
+                        :src="subComment.avatar"
+                        style="display: inline-block; vertical-align: middle"
+                      ></el-avatar>
+                      <span
+                        style="display: inline-block; vertical-align: middle"
+                        >{{ subComment.username }}
+                      </span>
+                      <spqn class="gmtCreate">{{ subComment.gmtCreate }}</spqn>
+                      <p>{{ subComment.content }}</p>
+
+                      <i class="el-icon-sugar" style="margin-right: 10px">{{
+                        subComment.likeCount
+                      }}</i>
+                      <hr />
+                    </div>
+                  </div>
+                </div>
+
                 <el-divider></el-divider>
               </div>
             </div>
@@ -117,7 +173,7 @@ export default {
   components: { Header2 },
   data() {
     return {
-      question: {
+      article: {
         id: "",
         title: "",
         description: "",
@@ -132,6 +188,7 @@ export default {
         avatar: "",
         username: "",
       },
+      //发表评论
       comment: {
         parentId: "",
         type: "",
@@ -139,11 +196,15 @@ export default {
         content: "",
       },
       getcomments: {},
+      subComments: {},
 
       //   评论输入框信息
       comments: "",
+      subInPutComment: "",
       ownBlog: false,
       visible: false,
+      showSub: true,
+      cuentCommentParentId: "",
     };
   },
   methods: {
@@ -151,15 +212,16 @@ export default {
       const _this = this;
       _this.comment.type = 1;
       _this.comment.content = contents;
+      _this.comment.parentId = _this.article.id;
       _this.comment.commentator = _this.$store.getters.getUser.id;
       this.$axios
-        .post("/comment/insertComment", this.comment, {
+        .post("/article-comment/insertComment", this.comment, {
           headers: {
             Authorization: localStorage.getItem("token"),
           },
         })
         .then((res) => {
-          this.showComments(this.question.id);
+          this.showComments(this.article.id);
 
           _this.$alert("评论成功", "提示", {
             confirmButtonText: "确定",
@@ -168,11 +230,34 @@ export default {
         });
     },
 
+    submitSubComment(contents) {
+      const _this = this;
+      _this.comment.type = 2;
+      _this.comment.content = contents;
+      _this.comment.parentId = this.cuentCommentParentId;
+      _this.comment.commentator = _this.$store.getters.getUser.id;
+      this.$axios
+        .post("/article-comment/insertComment", this.comment, {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
+        })
+        .then((res) => {
+          this.showSubComments(this.cuentCommentParentId);
+
+          _this.$alert("评论成功", "提示", {
+            confirmButtonText: "确定",
+          });
+          this.subInPutComment = "";
+          _this.comment.parentId = "";
+        });
+    },
+
     showComments(parentId) {
       const _this = this;
       const type = 1;
       this.$axios
-        .get("/comment/commentList", { params: { parentId, type } })
+        .get("/article-comment/commentList", { params: { parentId, type } })
         .then((res) => {
           _this.getcomments = res.data.data;
         });
@@ -180,37 +265,52 @@ export default {
 
     increaseView(id) {
       const _this = this;
-      console.log("增加阅读数id----------------------------", id);
       _this.$axios
-        .get("/question/increaseView", { params: { id } })
+        .get("/article/increaseView", { params: { id } })
         .then((res) => {
           console.log(res);
         });
     },
+
+    showSubComments(commentId) {
+      const parentId = commentId;
+      const type = 2;
+      this.cuentCommentParentId = commentId;
+      if (this.showSub) {
+        this.$axios
+          .get("/article-comment/commentList", { params: { parentId, type } })
+          .then((res) => {
+            this.subComments = res.data.data;
+          });
+      } else {
+        this.showSub = true;
+        this.subComments = {};
+      }
+    },
   },
 
   created() {
-    const questionId = this.$route.params.questionId;
-    const parentId = questionId;
+    const articleId = this.$route.params.articleId;
+    const parentId = articleId;
     const _this = this;
     this.$axios
-      .get("/question/question/" + questionId)
+      .get("/article/articleById/" + articleId)
       .then((res) => {
-        const question = res.data.data;
-        _this.question.id = question.id;
-        _this.question.title = question.title;
-        _this.comment.parentId = question.id;
-        this.increaseView(question.id);
+        const article = res.data.data;
+        _this.article.id = article.id;
+        _this.article.title = article.title;
+        _this.comment.parentId = article.id;
+        this.increaseView(article.id);
 
         var MardownIt = require("markdown-it");
         var md = new MardownIt();
 
-        var result = md.render(question.description);
-        _this.question.description = result;
-        _this.ownBlog = question.creator === _this.$store.getters.getUser.id;
+        var result = md.render(article.description);
+        _this.article.description = result;
+        _this.ownBlog = article.creator === _this.$store.getters.getUser.id;
         _this.currentUser.avatar = _this.$store.getters.getUser.avatar;
         _this.currentUser.username = _this.$store.getters.getUser.username;
-        return this.$axios.get("/user/" + question.creator);
+        return this.$axios.get("/user/" + article.creator);
       })
       .then((res) => {
         const user = res.data.data;
@@ -233,7 +333,7 @@ export default {
 #app {
   height: 100%;
 }
-.questionDetail {
+.articleDetail {
   width: 100%;
   min-height: 700px;
   padding: 20px 15px;
@@ -273,5 +373,9 @@ export default {
   float: right;
   font-size: 12px;
   padding-top: 8px;
+}
+
+.last-divider {
+  margin-bottom: 0;
 }
 </style>

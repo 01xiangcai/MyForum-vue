@@ -24,7 +24,7 @@
                   :to="{
                     name: 'QuestionDetail',
                     params: { questionId: question.id },
-                  }"
+                  }"                
                 >
                   {{ question.title }}
                 </router-link>
@@ -55,19 +55,20 @@
       <el-col :xs="6" :sm="6" :md="6" :lg="6" :xl="6" :push="1">
         <div>
           <div class="right">
-            <el-carousel  indicator-position="none">
+            <el-carousel indicator-position="none">
               <el-carousel-item v-for="item in 4" :key="item" class="carousel">
                 <h3>{{ item }}</h3>
               </el-carousel-item>
             </el-carousel>
           </div>
-
         </div>
       </el-col>
     </el-main>
-    <div class="container-footer">
+    <!-- <div class="container-footer">
       <Footer></Footer>
-    </div>
+    </div> -->
+    <!-- 回到顶部 -->
+    <el-backtop title="回到顶部" :bottom="220" ></el-backtop>
   </div>
 </template>
 
@@ -85,6 +86,9 @@ export default {
       pageSize: 5,
     };
   },
+
+
+
   methods: {
     page(currentPage) {
       const _this = this;
@@ -92,12 +96,19 @@ export default {
         .get("/question/questions?currentPage=" + currentPage)
         .then((res) => {
           _this.questions = res.data.data.questionRecords;
+      
           _this.currentPage = res.data.data.currentPage;
           _this.total = res.data.data.total;
           _this.pageSize = res.data.data.pageSize;
         });
     },
+
+    
+   
   },
+
+
+
   created() {
     this.page(1);
   },
@@ -148,9 +159,8 @@ export default {
   color: #475669;
   font-size: 18px;
   opacity: 0.75;
-  line-height:230px;
+  line-height: 230px;
   margin: 0;
-  
 }
 
 .el-carousel__item:nth-child(2n) {
@@ -161,8 +171,7 @@ export default {
   background-color: #d3dce6;
 }
 
-.carousel{
-   height: 230px;
+.carousel {
+  height: 230px;
 }
-
 </style>
