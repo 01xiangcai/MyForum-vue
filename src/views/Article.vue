@@ -75,7 +75,7 @@ export default {
       articles: {},
       currentPage: 1,
       total: 0,
-      pageSize: 5,
+      pageSize: '',
     };
   },
   methods: {
@@ -89,6 +89,7 @@ export default {
           _this.currentPage = res.data.data.currentPage;
           _this.total = res.data.data.total;
           _this.pageSize = res.data.data.pageSize;
+          console.log("pageSize----------->", res.data.data.pageSize);
         });
     },
   },
