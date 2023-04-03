@@ -53,8 +53,8 @@
       </el-col>
 
       <el-col :xs="6" :sm="6" :md="6" :lg="6" :xl="6" :push="1">
-        <div>
-          <div class="right">
+        <div  class="right">
+          <div>
             <el-carousel indicator-position="none">
               <el-carousel-item v-for="item in 4" :key="item" class="carousel">
                 <h3>{{ item }}</h3>
@@ -149,6 +149,7 @@ export default {
   flex-direction: column;
 }
 
+/* 右边盒子加了大小，当屏幕较小时会有横向滚动条 */
 .right {
   width: 350px;
   height: 230px;

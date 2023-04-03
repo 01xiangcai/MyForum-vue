@@ -161,9 +161,11 @@ export default {
         .then((res) => {
           this.showComments(this.question.id);
 
-          _this.$alert("评论成功", "提示", {
-            confirmButtonText: "确定",
-          });
+          _this.$message({
+                showClose: true,
+                message: res.data.msg,
+                type: "success",
+              });
           this.comments = "";
         });
     },
