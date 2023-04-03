@@ -104,7 +104,8 @@ export default {
 
   mounted() {
     // 在组件加载完成后连接 WebSocket
-    const ws = new WebSocket("ws://localhost:8888/notification");
+    const userId = this.currentuserId;
+    const ws = new WebSocket(`ws://localhost:8888/notification??userId=${userId}`);
     ws.onopen = () => {
       console.log("WebSocket 连接成功");
     };

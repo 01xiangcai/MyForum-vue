@@ -1,132 +1,107 @@
 <template>
-  <div>
-    <Header2></Header2>
-    <div>
-      <el-menu
-        :default-active="$route.path"
-        class="el-menu"
-        mode="horizontal"
-        text-color="rgb(60 173 207)"
-        active-text-color="#409EFF"
-        id="menu"
-        :router="true"
-      >
-        <el-menu-item index="/notifications/replies">回复</el-menu-item>
-        <el-menu-item index="/notifications/messages">私信</el-menu-item>
-        <el-menu-item index="/notifications/system">系统通知</el-menu-item>
-      </el-menu>
-    </div>
-    <el-tabs v-model="tabIndex" style="margin-top: 20px">
-      <el-tab-pane label="未读">
-        <div v-for="notification in notifications" :key="notification.id">
-          <el-card style="text-align: left">
-            {{ notification.notifierName }}回复了你的{{ notification.typeName }}
-
-            <!-- 跳转文章详情 -->
-            <router-link
-              :to="{
-                name: 'ArticleDetail',
-                params: { articleId: notification.outerid },
-              }"
-              v-show="notification.typeName == '文章'"
-            >
-              {{ notification.outerName }}
-            </router-link>
-            <!-- 跳转问题详情 -->
-            <router-link
-              :to="{
-                name: 'QuestionDetail',
-                params: { questionId: notification.outerid },
-              }"
-              v-show="notification.typeName == '问题'"
-            >
-              {{ notification.outerName }}
-            </router-link>
-
-            ||时间{{ notification.created }}
-            <el-button
-              type="success"
-              icon="el-icon-check"
-              size="mini"
-              circle
-              @click="markread(index)"
-            ></el-button>
-          </el-card>
-        </div>
-      </el-tab-pane>
-      <el-tab-pane label="已读">
-        <div
-          v-for="(notification, index) in readNotifications"
-          :key="index"
-          style="margin-top: 20px"
-        >
-          <el-alert
-            :closable="false"
-            :title="notification.title"
-            :type="notification.type"
-            :description="notification.description"
-            show-icon
+  <div class="article-ranking">
+    <el-card class="ranking-card">
+      <div slot="header" class="clearfix">
+        <span>热门文章排行</span>
+        <div class="ranking-select">
+          <el-select
+            v-model="rankingType"
+            placeholder="请选择排行方式"
+            @change="getArticles"
           >
-            <span slot="footer" @click="markUnread(index)">标记未读</span>
-          </el-alert>
+            <el-option label="最热" value="hot"></el-option>
+            <el-option label="观看" value="view"></el-option>
+            <el-option label="最新" value="new"></el-option>
+          </el-select>
         </div>
-      </el-tab-pane>
-    </el-tabs>
+      </div>
+      <div class="article-list">
+        <el-list :loading="loading" :empty-text="emptyText" :border="false">
+          <el-list-item
+            v-for="(article, index) in articles"
+            :key="article.id"
+            :index="index"
+          >
+            <div class="article-info">
+              <router-link :to="{ path: '/article/' + article.id }">{{
+                article.title
+              }}</router-link>
+              <span class="article-time">{{ article.createTime }}</span>
+            </div>
+           
+          </el-list-item>
+        </el-list>
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
-import Header2 from "@/components/Header2";
 export default {
-  components: { Header2 },
+  name: "MyTestIndex",
   data() {
     return {
-      tabIndex: 0,
-      notifications: [
-        {
-          type: "success",
-          title: "回复通知",
-          description: "你的文章《xxx》有新的回复。",
-          read: false,
-        },
-        {
-          type: "warning",
-          title: "私信通知",
-          description: "你收到了一封新的私信。",
-          read: false,
-        },
-        {
-          type: "info",
-          title: "系统通知",
-          description: "系统正在进行维护，可能会影响您的使用。",
-          read: true,
-        },
-      ],
+      articles: {},
+      count: "",
+      rankingType: "",
+      loading: false,
+      emptyText: "暂无数据",
     };
   },
-  computed: {
-    unreadNotifications() {
-      return this.notifications.filter((notification) => !notification.read);
-    },
-    readNotifications() {
-      return this.notifications.filter((notification) => notification.read);
-    },
+  mounted() {
+    this.getArticles();
   },
   methods: {
-    markRead(index) {
-      this.notifications[index].read = true;
-    },
-    markUnread(index) {
-      this.notifications[index].read = false;
+    async getArticles() {
+      this.loading = true;
+      const count = 5;
+      this.$axios
+        .get("/article/article/hot", { params: { count } })
+        .then((res) => {
+          if (res != null) {
+            this.articles = res.data.data;
+            this.emptyText = "暂无数据";
+          } else {
+            this.articles = [];
+            this.emptyText = "数据加载失败，请重试";
+          }
+          this.loading = false;
+        });
     },
   },
 };
 </script>
 
-
-
 <style scoped>
-.notifications-menu {
-  height: calc(50% - 20px); /* adjust the height as per your needs */
+.article-ranking {
+  margin-bottom: 30px;
+}
+.ranking-card {
+  width: 100%;
+  border-radius: 5px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+.ranking-select {
+  float: right;
+}
+.article-list {
+  margin-top: 10px;
+}
+.article-info {
+  display: inline-block;
+  width: calc(100% - 60px);
+  margin-right: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.article-time {
+  margin-left: 10px;
+  color: #909399;
+}
+.article-rank {
+  float: right;
+  font-size: 14px;
+  color: #909399;
 }
 </style>
