@@ -24,7 +24,7 @@
                   :to="{
                     name: 'QuestionDetail',
                     params: { questionId: question.id },
-                  }"                
+                  }"
                 >
                   {{ question.title }}
                 </router-link>
@@ -53,11 +53,24 @@
       </el-col>
 
       <el-col :xs="6" :sm="6" :md="6" :lg="6" :xl="6" :push="1">
-        <div  class="right">
+        <div class="right">
           <div>
             <el-carousel indicator-position="none">
-              <el-carousel-item v-for="item in 4" :key="item" class="carousel">
-                <h3>{{ item }}</h3>
+              <el-carousel-item
+                v-for="carouselurl in carouselList"
+                :key="carouselurl.id"
+                class="carousel"
+              >
+                <img
+                  :src="carouselurl.url"
+                  :alt="Image"
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    object-fit: fill;
+                    object-position: center;
+                  "
+                />
               </el-carousel-item>
             </el-carousel>
           </div>
@@ -68,7 +81,7 @@
       <Footer></Footer>
     </div> -->
     <!-- 回到顶部 -->
-    <el-backtop title="回到顶部" :bottom="220" ></el-backtop>
+    <el-backtop title="回到顶部" :bottom="220"></el-backtop>
   </div>
 </template>
 
@@ -82,12 +95,13 @@ export default {
     return {
       questions: {},
       currentPage: 1,
+
+      carouselList: {},
+
       total: 0,
       pageSize: 5,
     };
   },
-
-
 
   methods: {
     page(currentPage) {
@@ -96,21 +110,27 @@ export default {
         .get("/question/questions?currentPage=" + currentPage)
         .then((res) => {
           _this.questions = res.data.data.questionRecords;
-      
+
           _this.currentPage = res.data.data.currentPage;
           _this.total = res.data.data.total;
           _this.pageSize = res.data.data.pageSize;
         });
     },
 
-    
-   
+    // 轮播图
+    getCarousel(type) {
+      this.$axios
+        .get("/carousel/getCarousel", { params: { type } })
+        .then((res) => {
+          this.carouselList = res.data.data;
+         
+        });
+    },
   },
-
-
 
   created() {
     this.page(1);
+    this.getCarousel(2);
   },
 
   filters: {

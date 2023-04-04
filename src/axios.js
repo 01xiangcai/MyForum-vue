@@ -29,7 +29,7 @@ axios.interceptors.response.use(response => {
     }
   },
   error => {
-    console.log(error)
+    console.log("error--------------->",error)
     if(error.response.data) {
       error.message = error.response.data.msg
     }

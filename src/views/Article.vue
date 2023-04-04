@@ -59,8 +59,21 @@
           <!-- 轮播图 -->
           <div>
             <el-carousel indicator-position="none">
-              <el-carousel-item v-for="item in 4" :key="item" class="carousel">
-                <h3>{{ item }}</h3>
+              <el-carousel-item
+                v-for="carouselurl in carouselList"
+                :key="carouselurl.id"
+                class="carousel"
+              >
+                <img
+                  :src="carouselurl.url"
+                  :alt="Image"
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    object-fit: fill;
+                    object-position: center;
+                  "
+                />
               </el-carousel-item>
             </el-carousel>
           </div>
@@ -68,18 +81,7 @@
           <div class="article-ranking">
             <el-card class="ranking-card">
               <div slot="header" class="clearfix">
-                <span>热门文章排行</span>
-                <div class="ranking-select">
-                  <el-select
-                    v-model="rankingType"
-                    placeholder="请选择排行方式"
-                    @change="getArticles"
-                  >
-                    <el-option label="最热" value="hot"></el-option>
-                    <el-option label="观看" value="view"></el-option>
-                    <el-option label="最新" value="new"></el-option>
-                  </el-select>
-                </div>
+                <span>热门文章</span>
               </div>
               <div class="article-list">
                 <el-list
@@ -88,9 +90,8 @@
                   :border="false"
                 >
                   <el-list-item
-                    v-for="(article, index) in hotArticles"
+                    v-for="article in hotArticles"
                     :key="article.id"
-                    :index="index"
                   >
                     <div class="article-info">
                       <router-link
@@ -100,7 +101,6 @@
                         }"
                         >{{ article.title }}</router-link
                       >
-                      <span class="article-time">{{ article.createTime }}</span>
                     </div>
                   </el-list-item>
                 </el-list>
@@ -132,6 +132,8 @@ export default {
       total: 0,
       pageSize: "",
 
+      carouselList: {},
+
       hotArticles: {},
       count: "",
       rankingType: "",
@@ -158,6 +160,7 @@ export default {
         });
     },
 
+    // 热门文章
     async getArticles() {
       this.loading = true;
       const count = 12;
@@ -174,9 +177,20 @@ export default {
           this.loading = false;
         });
     },
+
+    // 轮播图
+    getCarousel(type) {
+      this.$axios
+        .get("/carousel/getCarousel", { params: { type } })
+        .then((res) => {
+          this.carouselList = res.data.data;
+          console.log("轮播图res---------->", res.data.data);
+        });
+    },
   },
   created() {
     this.page(1);
+    this.getCarousel(1);
   },
 
   filters: {

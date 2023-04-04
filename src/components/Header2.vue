@@ -105,7 +105,9 @@ export default {
   mounted() {
     // 在组件加载完成后连接 WebSocket
     const userId = this.currentuserId;
-    const ws = new WebSocket(`ws://localhost:8888/notification??userId=${userId}`);
+    const ws = new WebSocket(
+      `ws://localhost:8888/notification??userId=${userId}`
+    );
     ws.onopen = () => {
       console.log("WebSocket 连接成功");
     };
@@ -172,14 +174,17 @@ export default {
   },
 
   created() {
-    if (this.$store.getters.getUser.username) {
+    if (this.$store.getters.getUser) {
       this.user.username = this.$store.getters.getUser.username;
       this.user.avatar = this.$store.getters.getUser.avatar;
       this.currentuserId = this.$store.getters.getUser.id;
-      console.log("this.user.avatar---------------->", this.user.avatar);
+
       this.hasLogin = true;
     }
-    this.NotificationUnreadCount();
+    // 当用户登录的时候再去加载通知消息
+    if (this.$store.getters.getUser) {
+      this.NotificationUnreadCount();
+    }
   },
 };
 </script>
