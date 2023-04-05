@@ -33,7 +33,17 @@
           >{{ user.username }}</template
         >
         <!-- <template slot="title">{{ user.username }}</template> -->
-        <el-menu-item index="2-1">个人资料</el-menu-item>
+        <!-- <el-menu-item>
+          <router-link
+            :to="{
+              name: 'UserById',
+              params: { userId: currentuserId },
+            }"
+          >
+            个人资料
+          </router-link>
+        </el-menu-item> -->
+        <el-menu-item :index="`/user/${currentuserId}`">个人资料</el-menu-item>
         <el-menu-item index="/myArticles">我的文章</el-menu-item>
         <el-menu-item index="/myQuestions">我的问题</el-menu-item>
         <el-menu-item index="2-3" @click="logout">退出登录 </el-menu-item>
@@ -174,7 +184,7 @@ export default {
   },
 
   created() {
-    if (this.$store.getters.getUser) {
+    if (this.$store.getters.getUser.username) {
       this.user.username = this.$store.getters.getUser.username;
       this.user.avatar = this.$store.getters.getUser.avatar;
       this.currentuserId = this.$store.getters.getUser.id;
@@ -182,7 +192,7 @@ export default {
       this.hasLogin = true;
     }
     // 当用户登录的时候再去加载通知消息
-    if (this.$store.getters.getUser) {
+    if (this.$store.getters.getUser.username) {
       this.NotificationUnreadCount();
     }
   },
