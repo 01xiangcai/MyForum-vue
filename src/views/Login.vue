@@ -72,8 +72,13 @@ export default {
             // 把数据共享出去
             _this.$store.commit("SET_TOKEN", jwt);
             _this.$store.commit("SET_USERINFO", userInfo);
+
             // 获取
-            console.log(_this.$store.getters.getUser);
+            // console.log(
+            //   "_this.$store.getters.getUser---------->",
+            //   _this.$store.getters.getUser
+            // );
+
             _this.$message({
               showClose: true,
               message: res.data.msg,

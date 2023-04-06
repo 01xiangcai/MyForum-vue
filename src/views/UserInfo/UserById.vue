@@ -5,11 +5,28 @@
       <el-card class="box-card">
         <div class="userContainer">
           <div class="left" style="width: 100px; height: 100px">
-            <el-avatar
+            <!-- <el-avatar
               :src="user.avatar"
               :fit="fill"
               style="width: 90%; height: 90%"
-            ></el-avatar>
+            ></el-avatar> -->
+
+            <el-upload
+              class="avatar-uploader"
+              action="http://localhost:8888/user/uploadAvatar"
+              :data="{ userId: user.id }"
+              :on-success="handleAvatarSuccess"
+              :before-upload="beforeAvatarUpload"
+            >
+              <el-avatar
+                v-if="user.avatar"
+                :src="user.avatar"
+                :fit="fill"
+                shape="square"
+                style="width: 100%; height: 100%"
+              ></el-avatar>
+              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            </el-upload>
           </div>
           <div class="right">
             <span>用户名字:{{ user.username }} </span>
@@ -123,6 +140,7 @@ export default {
   data() {
     return {
       user: "",
+
       userInfoForm: {
         userId: "",
         username: "",
@@ -188,6 +206,9 @@ export default {
               });
               this.dialogVisible = false;
               this.getUserInfo(this.$store.getters.getUser.id);
+              // 替换原有共享数据
+              const userInfo = res.data.data;
+              this.$store.commit("SET_USERINFO", userInfo);
             })
             .catch((error) => {
               console.log("error------------------->", error);
@@ -220,6 +241,31 @@ export default {
       this.userInfoForm.confirmNewPassword = "";
       this.changePasswordVisible = !this.changePasswordVisible;
     },
+
+    handleAvatarSuccess(res, file) {
+      this.$message({
+        showClose: true,
+        message: res.msg,
+        type: "success",
+      });
+      // 修改用户信息再次共享出去
+      const userInfo = this.$store.getters.getUser;
+      userInfo.avatar = res.data;
+      this.$store.commit("SET_USERINFO", userInfo);
+
+      this.user.avatar = this.$store.getters.getUser.avatar;
+    },
+    beforeAvatarUpload(file) {
+      const isJPG = file.type === "image/jpeg";
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isJPG) {
+        this.$message.error("上传头像图片只能是 JPG 格式!");
+      }
+      if (!isLt2M) {
+        this.$message.error("上传头像图片大小不能超过 2MB!");
+      }
+      return isJPG && isLt2M;
+    },
   },
 
   created() {
@@ -233,7 +279,7 @@ export default {
 
 
 
-<style scoped>
+<style>
 .userStyle {
   margin-left: 220px;
   margin-right: 550px;
@@ -253,6 +299,32 @@ export default {
   flex: 6;
 }
 
+/* 头像上传显示 */
 
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409eff;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  height: 100%;
+  width: 100%;
+  line-height: 100%;
+  text-align: center;
+}
+
+.avatar-uploader {
+  width: 90%;
+  height: 90%;
+}
 </style>
 
