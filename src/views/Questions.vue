@@ -106,6 +106,7 @@ export default {
   methods: {
     page(currentPage) {
       const _this = this;
+
       _this.$axios
         .get("/question/questions?currentPage=" + currentPage)
         .then((res) => {
@@ -123,13 +124,13 @@ export default {
         .get("/carousel/getCarousel", { params: { type } })
         .then((res) => {
           this.carouselList = res.data.data;
-         
         });
     },
   },
 
   created() {
     this.page(1);
+
     this.getCarousel(2);
   },
 

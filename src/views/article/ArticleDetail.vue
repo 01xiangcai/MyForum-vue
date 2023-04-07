@@ -179,6 +179,7 @@ export default {
         description: "",
         creator: "",
       },
+
       user: {
         id: "",
         username: "",
@@ -213,7 +214,9 @@ export default {
       _this.comment.type = 1;
       _this.comment.content = contents;
       _this.comment.parentId = _this.article.id;
-      _this.comment.commentator = _this.$store.getters.getUser.id;
+      if (_this.$store.getters.getUser) {
+        _this.comment.commentator = _this.$store.getters.getUser.id;
+      }
       this.$axios
         .post("/article-comment/insertComment", this.comment, {
           headers: {
@@ -228,6 +231,14 @@ export default {
             type: "success",
           });
           this.comments = "";
+        })
+        .catch((error) => {
+          console.log("error------------------->", error);
+          this.$message({
+            showClose: true,
+            message: "请先登录",
+            type: "error",
+          });
         });
     },
 
@@ -270,9 +281,7 @@ export default {
       const _this = this;
       _this.$axios
         .get("/article/increaseView", { params: { id } })
-        .then((res) => {
-          console.log(res);
-        });
+        .then((res) => {});
     },
 
     showSubComments(commentId) {
@@ -303,6 +312,7 @@ export default {
         _this.article.id = article.id;
         _this.article.title = article.title;
         _this.comment.parentId = article.id;
+
         this.increaseView(article.id);
 
         var MardownIt = require("markdown-it");
@@ -310,9 +320,14 @@ export default {
 
         var result = md.render(article.description);
         _this.article.description = result;
-        _this.ownBlog = article.creator === _this.$store.getters.getUser.id;
-        _this.currentUser.avatar = _this.$store.getters.getUser.avatar;
-        _this.currentUser.username = _this.$store.getters.getUser.username;
+
+        // 当用户处于登录状态时再去获取值,不登录时store中不存在user的信息，用_this.$store.getters.getUser.username这种去判断报空指针
+        if (_this.$store.getters.getUser) {
+          _this.ownBlog = article.creator === _this.$store.getters.getUser.id;
+          _this.currentUser.avatar = _this.$store.getters.getUser.avatar;
+          _this.currentUser.username = _this.$store.getters.getUser.username;
+        }
+
         return this.$axios.get("/user/" + article.creator);
       })
       .then((res) => {
@@ -322,9 +337,7 @@ export default {
         _this.user.username = user.username;
       })
       .catch((error) => {
-        _this.$alert("查询失败", "提示", {
-          confirmButtonText: "确定",
-        });
+        console.log("查询作者没有执行");
       });
 
     this.showComments(parentId);

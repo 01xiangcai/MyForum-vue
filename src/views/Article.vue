@@ -129,6 +129,7 @@ export default {
     return {
       articles: {},
       currentPage: 1,
+      prevPage: "",
       total: 0,
       pageSize: "",
 
@@ -142,22 +143,63 @@ export default {
     };
   },
   mounted() {
-    this.getArticles();
+    const state = window.history.state;
+    //页码跳转
+    if (state && state.currentPage && state.prevPage) {
+      this.prevPage = state.prevPage;
+      this.currentPage = state.currentPage;
+    }
+    //文章详情返回
+    if (state && state.currentPage) {
+      this.currentPage = state.currentPage;
+    }
+    this.page(this.currentPage);
+
+    window.addEventListener("popstate", this.handlePopstate);
+  },
+  beforeDestroy() {
+    window.removeEventListener("popstate", this.handlePopstate);
+  },
+  beforeRouteLeave(to, from, next) {
+    // 将当前页码存储到浏览器的历史记录中
+    window.history.pushState({ currentPage: this.currentPage }, "");
+
+    next();
   },
 
   methods: {
     page(currentPage) {
-      const _this = this;
-      _this.$axios
-        .get("/article/articleList?currentPage=" + currentPage)
+      this.prevPage = this.currentPage;
+      this.currentPage = currentPage;
+      this.Articles();
+      // 将上一页的页码保存到浏览器历史中
+      // 保存当前页码到历史记录中
+      window.history.pushState(
+        {
+          prevPage: this.prevPage,
+          currentPage: this.currentPage,
+        },
+        ""
+      );
+    },
+    Articles() {
+      this.$axios
+        .get("/article/articleList?currentPage=" + this.currentPage)
         .then((res) => {
-          console.log(res);
-          _this.articles = res.data.data.articleRecords;
-          _this.currentPage = res.data.data.currentPage;
-          _this.total = res.data.data.total;
-          _this.pageSize = res.data.data.pageSize;
+          console.log("文章", res);
+          this.articles = res.data.data.articleRecords;
+          this.currentPage = res.data.data.currentPage;
+          this.total = res.data.data.total;
+          this.pageSize = res.data.data.pageSize;
           console.log("pageSize----------->", res.data.data.pageSize);
         });
+    },
+    handlePopstate(event) {
+      if (event.state && event.state.currentPage && event.state.prevPage) {
+        this.currentPage = event.state.currentPage;
+        this.prevPage = event.state.prevPage;
+        this.Articles();
+      }
     },
 
     // 热门文章
@@ -189,8 +231,9 @@ export default {
     },
   },
   created() {
-    this.page(1);
     this.getCarousel(1);
+    //获取热门文章
+    this.getArticles();
   },
 
   filters: {
