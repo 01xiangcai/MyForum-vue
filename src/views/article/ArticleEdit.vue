@@ -20,8 +20,24 @@
           <mavon-editor v-model="ruleForm.description"></mavon-editor>
         </el-form-item>
 
-        <el-form-item label="标签" prop="tag">
+        <!-- <el-form-item label="标签" prop="tag">
           <el-input v-model="ruleForm.tag"></el-input>
+        </el-form-item> -->
+        <el-form-item prop="tag">
+          <el-select
+            v-model="ruleForm.tag"
+            clearable
+            placeholder="选择标签"
+            style="float: left"
+          >
+            <el-option
+              v-for="tag in tags"
+              :key="tag.id"
+              :label="tag.tagName"
+              :value="tag.id"
+            >
+            </el-option>
+          </el-select>
         </el-form-item>
 
         <el-form-item>
@@ -50,6 +66,8 @@ export default {
         tag: "",
         creator: "",
       },
+      //标签
+      tags: {},
 
       rules: {
         title: [
@@ -87,7 +105,7 @@ export default {
                 message: res.data.msg,
                 type: "success",
               });
-               _this.$router.push("/article");
+              _this.$router.push("/article");
             });
         } else {
           console.log("error submit!!");
@@ -97,6 +115,11 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
+    },
+    getTags() {
+      this.$axios.get("/article-tag/getArticleTag").then((res) => {
+        this.tags = res.data.data;
+      });
     },
   },
   created() {
@@ -112,6 +135,7 @@ export default {
         _this.ruleForm.tag = article.tag;
       });
     }
+    _this.getTags();
   },
 };
 </script>
