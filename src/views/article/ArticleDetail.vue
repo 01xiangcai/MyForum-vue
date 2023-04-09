@@ -156,6 +156,35 @@
               <el-button plain>私信</el-button>
             </p>
           </div>
+          <div class="releventArticle">
+            <el-card class="ranking-card">
+              <div slot="header" class="clearfix">
+                <span>相关文章</span>
+              </div>
+              <div class="article-list">
+                <el-list
+                  :loading="loading"
+                  :empty-text="emptyText"
+                  :border="false"
+                >
+                  <el-list-item
+                    v-for="releventArticle in releventArticles"
+                    :key="releventArticle.id"
+                  >
+                    <div class="article-info">
+                      <router-link
+                        :to="{
+                          name: 'ArticleDetail',
+                          params: { articleId: releventArticle.id },
+                        }"
+                        >{{ releventArticle.title }}</router-link
+                      >
+                    </div>
+                  </el-list-item>
+                </el-list>
+              </div>
+            </el-card>
+          </div>
         </div>
       </el-col>
     </div>
@@ -178,7 +207,11 @@ export default {
         title: "",
         description: "",
         creator: "",
+        tagId: "",
       },
+
+      //相关文章
+      releventArticles: {},
 
       user: {
         id: "",
@@ -299,7 +332,18 @@ export default {
         this.subComments = {};
       }
     },
+
+    getReleventArticles(tagId, count) {
+      
+      this.$axios
+        .get("/article/article/relevent", { params: {tagId, count} })
+        .then((res) => {
+          this.releventArticles = res.data.data;
+        });
+    },
   },
+
+ 
 
   created() {
     const articleId = this.$route.params.articleId;
@@ -311,6 +355,8 @@ export default {
         const article = res.data.data;
         _this.article.id = article.id;
         _this.article.title = article.title;
+        _this.article.tagId = article.tag;
+       
         _this.comment.parentId = article.id;
 
         this.increaseView(article.id);
@@ -335,12 +381,14 @@ export default {
         _this.user.avatar = user.avatar;
         _this.user.id = user.id;
         _this.user.username = user.username;
+        //查询相关文章
+        _this.getReleventArticles(_this.article.tagId, 12);
       })
       .catch((error) => {
         console.log("查询作者没有执行");
       });
-
-    this.showComments(parentId);
+    
+    this.showComments(parentId);    
   },
 };
 </script>
@@ -374,6 +422,13 @@ export default {
   background: #f3f4f9ea;
   width: 260px;
   height: 160px;
+}
+
+.releventArticle {
+
+  width: 260px;
+  height: 160px;
+  margin-top: 35px;
 }
 
 .markdown-body {

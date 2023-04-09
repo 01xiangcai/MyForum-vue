@@ -17,8 +17,13 @@
         </el-form-item>
 
         <el-form-item label="内容" prop="description">
-          <mavon-editor v-model="ruleForm.description"></mavon-editor>
+          <mavon-editor
+            v-model="ruleForm.description"
+            @imgAdd="$imgAdd"
+            @imgDel="$imgDel"
+          ></mavon-editor>
         </el-form-item>
+        <el-button @click="uploadimgs()">统一上传图片</el-button>
 
         <!-- <el-form-item label="标签" prop="tag">
           <el-input v-model="ruleForm.tag"></el-input>
@@ -68,6 +73,8 @@ export default {
       },
       //标签
       tags: {},
+
+      img_file: {},
 
       rules: {
         title: [
@@ -120,6 +127,41 @@ export default {
       this.$axios.get("/article-tag/getArticleTag").then((res) => {
         this.tags = res.data.data;
       });
+    },
+
+    // 绑定@imgAdd event
+    $imgAdd(pos, $file) {
+      // 缓存图片信息
+      this.img_file[pos] = $file;
+    },
+    $imgDel(pos) {
+      // 从 imgFiles 中删除指定位置的图片
+      delete this.img_file[pos];
+    },
+
+    uploadimgs($e) {
+      // 第一步.将图片上传到服务器.
+      var formdata = new FormData();
+      console.log("zhixingsadjmkaskdjkalsjdlkasjdas");
+      for (var _img in this.img_file) {
+        formdata.append(_img, this.img_file[_img]);
+      }
+
+      this.$axios
+        .post("/upload/qiniuImages", formdata, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((res) => {
+          for (var img in res) {
+            // $vm.$img2Url 详情见本页末尾
+            $vm.$img2Url(img[0], img[1]);
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
   },
   created() {
