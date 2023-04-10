@@ -2,11 +2,7 @@
   <div>
     <el-container>
       <el-header>
-        <img
-          class="mlogo"
-          src="https://www.markerhub.com/dist/images/logo/markerhub-logo.png"
-          alt=""
-        />
+        
       </el-header>
       <el-main>
         <el-form
@@ -25,7 +21,7 @@
 
           <el-form-item>
             <el-button type="primary" @click="submitForm('ruleForm')"
-              >立即创建</el-button
+              >登录</el-button
             >
             <el-button @click="resetForm('ruleForm')">重置</el-button>
           </el-form-item>

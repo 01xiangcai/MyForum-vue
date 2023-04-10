@@ -2,7 +2,24 @@
   <div>
     <!--点击按钮触发图片统一上传-->
     <el-button @click="uploadimgs()">统一上传图片</el-button>
-    <mavon-editor ref="md" @imgAdd="$imgAdd" @imgDel="$imgDel"></mavon-editor>
+    <mavon-editor ref="md" @imgAdd="$imgAdd" @imgDel="$imgDel" v-model="des">
+      <template slot="left-toolbar-after">
+        <input
+          type="file"
+          accept=".md"
+          ref="fileInput"
+          style="display: none"
+          @change="importMd($event)"
+        />
+        <button
+          type="button"
+          @click="openFileInput"
+          class="op-icon fa fa-mavon-align-left"
+          aria-hidden="true"
+          title="导入md文档"
+        ></button>
+      </template>
+    </mavon-editor>
   </div>
 </template>
 
@@ -13,6 +30,7 @@ export default {
   data() {
     return {
       img_file: {},
+      des: "",
     };
   },
   methods: {
@@ -33,10 +51,10 @@ export default {
 
       for (var _img in this.img_file) {
         console.log("this.img_file[_img]----------->", this.img_file[_img]);
-        formdata.append(_img, this.img_file[_img]);
+        formdata.append("files", this.img_file[_img]);
         console.log(
-          "formdata.get(_img)----------------------->",
-          formdata.get(_img)
+          "formdata.get('files')----------------------->",
+          formdata.get("files")
         );
       }
 
@@ -49,14 +67,39 @@ export default {
           },
         })
         .then((res) => {
-          for (var img in res) {
+          console.log("执行res--------------->", res);
+          for (let { pos, url } of res.data.data) {
+            console.log("执行啊res--------------->", res.data.data);
             // $vm.$img2Url 详情见本页末尾
-            $vm.$img2Url(img[0], img[1]);
+            $vm.$img2Url(pos, url);
           }
         })
         .catch((error) => {
-          console.error(error);
+          console.error("发生了错误", error);
         });
+    },
+    openFileInput() {
+      this.$refs.fileInput.click();
+    },
+    //导入md文档
+    importMd(e) {
+      const file = e.target.files[0];
+      if (!file.name.endsWith(".md")) {
+        this.$message.warning("文件扩展名必须为.md！");
+        return;
+      }
+      const reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = (res) => {
+        this.des = res.target.result;
+        console.log("res-------------->", res);
+        this.$message({
+          showClose: true,
+          message: "上传成功，图片需要重新上传！！！",
+          type: "success",
+        });
+      };
+      e.target.value = null;
     },
   },
 };

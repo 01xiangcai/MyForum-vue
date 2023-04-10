@@ -54,6 +54,7 @@
         <template slot="title">
           <i class="el-icon-message-solid" style="position: relative"
             ><el-badge
+              v-if="notificationUnreadCount != 0"
               :value="notificationUnreadCount"
               :max="99"
               class="item"
@@ -64,6 +65,7 @@
 
         <el-menu-item index="/commentNotification"
           >回复<el-badge
+            v-if="notificationUnreadCount != 0"
             :value="notificationUnreadCount"
             :max="99"
             class="item"

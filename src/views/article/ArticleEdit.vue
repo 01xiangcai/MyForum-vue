@@ -18,10 +18,29 @@
 
         <el-form-item label="内容" prop="description">
           <mavon-editor
+            ref="md"
             v-model="ruleForm.description"
             @imgAdd="$imgAdd"
             @imgDel="$imgDel"
-          ></mavon-editor>
+          >
+            <!-- 自定义上传md文件功能导航按钮 -->
+            <template slot="left-toolbar-after">
+              <input
+                type="file"
+                accept=".md"
+                ref="fileInput"
+                style="display: none"
+                @change="importMd($event)"
+              />
+              <button
+                type="button"
+                @click="openFileInput"
+                class="op-icon fa fa-mavon-align-left"
+                aria-hidden="true"
+                title="导入md文档"
+              ></button>
+            </template>
+          </mavon-editor>
         </el-form-item>
         <el-button @click="uploadimgs()">统一上传图片</el-button>
 
@@ -133,6 +152,7 @@ export default {
     $imgAdd(pos, $file) {
       // 缓存图片信息
       this.img_file[pos] = $file;
+      console.log("pos----->", pos, $file);
     },
     $imgDel(pos) {
       // 从 imgFiles 中删除指定位置的图片
@@ -142,26 +162,54 @@ export default {
     uploadimgs($e) {
       // 第一步.将图片上传到服务器.
       var formdata = new FormData();
-      console.log("zhixingsadjmkaskdjkalsjdlkasjdas");
+      const $vm = this.$refs.md;
       for (var _img in this.img_file) {
-        formdata.append(_img, this.img_file[_img]);
+        formdata.append("files", this.img_file[_img]);
       }
-
       this.$axios
-        .post("/upload/qiniuImages", formdata, {
+        .post("/upload/uploadImagesBatch", formdata, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         })
         .then((res) => {
-          for (var img in res) {
-            // $vm.$img2Url 详情见本页末尾
-            $vm.$img2Url(img[0], img[1]);
+          for (var img of res.data.data) {
+            $vm.$img2Url(img.pos, img.url);
           }
+          this.$message({
+            showClose: true,
+            message: res.data.msg,
+            type: "success",
+          });
         })
         .catch((error) => {
           console.error(error);
         });
+    },
+
+    //自定义导入md文件导航按钮函数
+    openFileInput() {
+      this.$refs.fileInput.click();
+    },
+    //导入md文档
+    importMd(e) {
+      const file = e.target.files[0];
+      if (!file.name.endsWith(".md")) {
+        this.$message.warning("文件扩展名必须为.md！");
+        return;
+      }
+      const reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = (res) => {
+        this.ruleForm.description = res.target.result;
+       
+        this.$message({
+          showClose: true,
+          message: "上传成功，图片需要重新上传！！！",
+          type: "success",
+        });
+      };
+      e.target.value = null;
     },
   },
   created() {
