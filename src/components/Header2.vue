@@ -33,7 +33,17 @@
           >{{ user.username }}</template
         >
         <!-- <template slot="title">{{ user.username }}</template> -->
-        <el-menu-item index="2-1">个人资料</el-menu-item>
+        <!-- <el-menu-item>
+          <router-link
+            :to="{
+              name: 'UserById',
+              params: { userId: currentuserId },
+            }"
+          >
+            个人资料
+          </router-link>
+        </el-menu-item> -->
+        <el-menu-item :index="`/user/${currentuserId}`">个人资料</el-menu-item>
         <el-menu-item index="/myArticles">我的文章</el-menu-item>
         <el-menu-item index="/myQuestions">我的问题</el-menu-item>
         <el-menu-item index="2-3" @click="logout">退出登录 </el-menu-item>
@@ -44,6 +54,7 @@
         <template slot="title">
           <i class="el-icon-message-solid" style="position: relative"
             ><el-badge
+              v-if="notificationUnreadCount != 0"
               :value="notificationUnreadCount"
               :max="99"
               class="item"
@@ -54,6 +65,7 @@
 
         <el-menu-item index="/commentNotification"
           >回复<el-badge
+            v-if="notificationUnreadCount != 0"
             :value="notificationUnreadCount"
             :max="99"
             class="item"
@@ -105,7 +117,9 @@ export default {
   mounted() {
     // 在组件加载完成后连接 WebSocket
     const userId = this.currentuserId;
-    const ws = new WebSocket(`ws://localhost:8888/notification??userId=${userId}`);
+    const ws = new WebSocket(
+      `ws://localhost:8888/notification??userId=${userId}`
+    );
     ws.onopen = () => {
       console.log("WebSocket 连接成功");
     };
@@ -176,10 +190,13 @@ export default {
       this.user.username = this.$store.getters.getUser.username;
       this.user.avatar = this.$store.getters.getUser.avatar;
       this.currentuserId = this.$store.getters.getUser.id;
-      console.log("this.user.avatar---------------->", this.user.avatar);
+
       this.hasLogin = true;
     }
-    this.NotificationUnreadCount();
+    // 当用户登录的时候再去加载通知消息
+    if (this.$store.getters.getUser.username) {
+      this.NotificationUnreadCount();
+    }
   },
 };
 </script>

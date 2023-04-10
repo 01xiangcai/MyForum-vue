@@ -1,107 +1,108 @@
 <template>
-  <div class="article-ranking">
-    <el-card class="ranking-card">
-      <div slot="header" class="clearfix">
-        <span>热门文章排行</span>
-        <div class="ranking-select">
-          <el-select
-            v-model="rankingType"
-            placeholder="请选择排行方式"
-            @change="getArticles"
-          >
-            <el-option label="最热" value="hot"></el-option>
-            <el-option label="观看" value="view"></el-option>
-            <el-option label="最新" value="new"></el-option>
-          </el-select>
-        </div>
-      </div>
-      <div class="article-list">
-        <el-list :loading="loading" :empty-text="emptyText" :border="false">
-          <el-list-item
-            v-for="(article, index) in articles"
-            :key="article.id"
-            :index="index"
-          >
-            <div class="article-info">
-              <router-link :to="{ path: '/article/' + article.id }">{{
-                article.title
-              }}</router-link>
-              <span class="article-time">{{ article.createTime }}</span>
-            </div>
-           
-          </el-list-item>
-        </el-list>
-      </div>
-    </el-card>
+  <div>
+    <!--点击按钮触发图片统一上传-->
+    <el-button @click="uploadimgs()">统一上传图片</el-button>
+    <mavon-editor ref="md" @imgAdd="$imgAdd" @imgDel="$imgDel" v-model="des">
+      <template slot="left-toolbar-after">
+        <input
+          type="file"
+          accept=".md"
+          ref="fileInput"
+          style="display: none"
+          @change="importMd($event)"
+        />
+        <button
+          type="button"
+          @click="openFileInput"
+          class="op-icon fa fa-mavon-align-left"
+          aria-hidden="true"
+          title="导入md文档"
+        ></button>
+      </template>
+    </mavon-editor>
   </div>
 </template>
 
+
 <script>
 export default {
-  name: "MyTestIndex",
+  name: "MyTestIndex.vue",
   data() {
     return {
-      articles: {},
-      count: "",
-      rankingType: "",
-      loading: false,
-      emptyText: "暂无数据",
+      img_file: {},
+      des: "",
     };
   },
-  mounted() {
-    this.getArticles();
-  },
   methods: {
-    async getArticles() {
-      this.loading = true;
-      const count = 5;
+    // 绑定@imgAdd event
+    $imgAdd(pos, $file) {
+      // 缓存图片信息
+      this.img_file[pos] = $file;
+      console.log("this.img_file-------------->", this.img_file);
+    },
+    $imgDel(pos) {
+      // 从 imgFiles 中删除指定位置的图片
+      delete this.img_file[pos];
+    },
+
+    uploadimgs($e) {
+      // 第一步.将图片上传到服务器.
+      var formdata = new FormData();
+
+      for (var _img in this.img_file) {
+        console.log("this.img_file[_img]----------->", this.img_file[_img]);
+        formdata.append("files", this.img_file[_img]);
+        console.log(
+          "formdata.get('files')----------------------->",
+          formdata.get("files")
+        );
+      }
+
+      console.log(formdata);
+
       this.$axios
-        .get("/article/article/hot", { params: { count } })
+        .post("/upload/uploadImagesBatch", formdata, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
         .then((res) => {
-          if (res != null) {
-            this.articles = res.data.data;
-            this.emptyText = "暂无数据";
-          } else {
-            this.articles = [];
-            this.emptyText = "数据加载失败，请重试";
+          console.log("执行res--------------->", res);
+          for (let { pos, url } of res.data.data) {
+            console.log("执行啊res--------------->", res.data.data);
+            // $vm.$img2Url 详情见本页末尾
+            $vm.$img2Url(pos, url);
           }
-          this.loading = false;
+        })
+        .catch((error) => {
+          console.error("发生了错误", error);
         });
+    },
+    openFileInput() {
+      this.$refs.fileInput.click();
+    },
+    //导入md文档
+    importMd(e) {
+      const file = e.target.files[0];
+      if (!file.name.endsWith(".md")) {
+        this.$message.warning("文件扩展名必须为.md！");
+        return;
+      }
+      const reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = (res) => {
+        this.des = res.target.result;
+        console.log("res-------------->", res);
+        this.$message({
+          showClose: true,
+          message: "上传成功，图片需要重新上传！！！",
+          type: "success",
+        });
+      };
+      e.target.value = null;
     },
   },
 };
 </script>
 
-<style scoped>
-.article-ranking {
-  margin-bottom: 30px;
-}
-.ranking-card {
-  width: 100%;
-  border-radius: 5px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-}
-.ranking-select {
-  float: right;
-}
-.article-list {
-  margin-top: 10px;
-}
-.article-info {
-  display: inline-block;
-  width: calc(100% - 60px);
-  margin-right: 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.article-time {
-  margin-left: 10px;
-  color: #909399;
-}
-.article-rank {
-  float: right;
-  font-size: 14px;
-  color: #909399;
-}
-</style>
+

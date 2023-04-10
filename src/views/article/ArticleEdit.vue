@@ -17,11 +17,51 @@
         </el-form-item>
 
         <el-form-item label="内容" prop="description">
-          <mavon-editor v-model="ruleForm.description"></mavon-editor>
+          <mavon-editor
+            ref="md"
+            v-model="ruleForm.description"
+            @imgAdd="$imgAdd"
+            @imgDel="$imgDel"
+          >
+            <!-- 自定义上传md文件功能导航按钮 -->
+            <template slot="left-toolbar-after">
+              <input
+                type="file"
+                accept=".md"
+                ref="fileInput"
+                style="display: none"
+                @change="importMd($event)"
+              />
+              <button
+                type="button"
+                @click="openFileInput"
+                class="op-icon fa fa-mavon-align-left"
+                aria-hidden="true"
+                title="导入md文档"
+              ></button>
+            </template>
+          </mavon-editor>
         </el-form-item>
+        <el-button @click="uploadimgs()">统一上传图片</el-button>
 
-        <el-form-item label="标签" prop="tag">
+        <!-- <el-form-item label="标签" prop="tag">
           <el-input v-model="ruleForm.tag"></el-input>
+        </el-form-item> -->
+        <el-form-item prop="tag">
+          <el-select
+            v-model="ruleForm.tag"
+            clearable
+            placeholder="选择标签"
+            style="float: left"
+          >
+            <el-option
+              v-for="tag in tags"
+              :key="tag.id"
+              :label="tag.tagName"
+              :value="tag.id"
+            >
+            </el-option>
+          </el-select>
         </el-form-item>
 
         <el-form-item>
@@ -50,6 +90,10 @@ export default {
         tag: "",
         creator: "",
       },
+      //标签
+      tags: {},
+
+      img_file: {},
 
       rules: {
         title: [
@@ -87,7 +131,7 @@ export default {
                 message: res.data.msg,
                 type: "success",
               });
-               _this.$router.push("/article");
+              _this.$router.push("/article");
             });
         } else {
           console.log("error submit!!");
@@ -97,6 +141,75 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
+    },
+    getTags() {
+      this.$axios.get("/article-tag/getArticleTag").then((res) => {
+        this.tags = res.data.data;
+      });
+    },
+
+    // 绑定@imgAdd event
+    $imgAdd(pos, $file) {
+      // 缓存图片信息
+      this.img_file[pos] = $file;
+      console.log("pos----->", pos, $file);
+    },
+    $imgDel(pos) {
+      // 从 imgFiles 中删除指定位置的图片
+      delete this.img_file[pos];
+    },
+
+    uploadimgs($e) {
+      // 第一步.将图片上传到服务器.
+      var formdata = new FormData();
+      const $vm = this.$refs.md;
+      for (var _img in this.img_file) {
+        formdata.append("files", this.img_file[_img]);
+      }
+      this.$axios
+        .post("/upload/uploadImagesBatch", formdata, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((res) => {
+          for (var img of res.data.data) {
+            $vm.$img2Url(img.pos, img.url);
+          }
+          this.$message({
+            showClose: true,
+            message: res.data.msg,
+            type: "success",
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+
+    //自定义导入md文件导航按钮函数
+    openFileInput() {
+      this.$refs.fileInput.click();
+    },
+    //导入md文档
+    importMd(e) {
+      const file = e.target.files[0];
+      if (!file.name.endsWith(".md")) {
+        this.$message.warning("文件扩展名必须为.md！");
+        return;
+      }
+      const reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = (res) => {
+        this.ruleForm.description = res.target.result;
+       
+        this.$message({
+          showClose: true,
+          message: "上传成功，图片需要重新上传！！！",
+          type: "success",
+        });
+      };
+      e.target.value = null;
     },
   },
   created() {
@@ -112,6 +225,7 @@ export default {
         _this.ruleForm.tag = article.tag;
       });
     }
+    _this.getTags();
   },
 };
 </script>

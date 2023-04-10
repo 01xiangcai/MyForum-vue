@@ -59,8 +59,21 @@
           <!-- 轮播图 -->
           <div>
             <el-carousel indicator-position="none">
-              <el-carousel-item v-for="item in 4" :key="item" class="carousel">
-                <h3>{{ item }}</h3>
+              <el-carousel-item
+                v-for="carouselurl in carouselList"
+                :key="carouselurl.id"
+                class="carousel"
+              >
+                <img
+                  :src="carouselurl.url"
+                  :alt="Image"
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    object-fit: fill;
+                    object-position: center;
+                  "
+                />
               </el-carousel-item>
             </el-carousel>
           </div>
@@ -68,18 +81,7 @@
           <div class="article-ranking">
             <el-card class="ranking-card">
               <div slot="header" class="clearfix">
-                <span>热门文章排行</span>
-                <div class="ranking-select">
-                  <el-select
-                    v-model="rankingType"
-                    placeholder="请选择排行方式"
-                    @change="getArticles"
-                  >
-                    <el-option label="最热" value="hot"></el-option>
-                    <el-option label="观看" value="view"></el-option>
-                    <el-option label="最新" value="new"></el-option>
-                  </el-select>
-                </div>
+                <span>热门文章</span>
               </div>
               <div class="article-list">
                 <el-list
@@ -88,9 +90,8 @@
                   :border="false"
                 >
                   <el-list-item
-                    v-for="(article, index) in hotArticles"
+                    v-for="article in hotArticles"
                     :key="article.id"
-                    :index="index"
                   >
                     <div class="article-info">
                       <router-link
@@ -100,7 +101,6 @@
                         }"
                         >{{ article.title }}</router-link
                       >
-                      <span class="article-time">{{ article.createTime }}</span>
                     </div>
                   </el-list-item>
                 </el-list>
@@ -129,8 +129,11 @@ export default {
     return {
       articles: {},
       currentPage: 1,
+      prevPage: "",
       total: 0,
       pageSize: "",
+
+      carouselList: {},
 
       hotArticles: {},
       count: "",
@@ -140,24 +143,66 @@ export default {
     };
   },
   mounted() {
-    this.getArticles();
+    const state = window.history.state;
+    //页码跳转
+    if (state && state.currentPage && state.prevPage) {
+      this.prevPage = state.prevPage;
+      this.currentPage = state.currentPage;
+    }
+    //文章详情返回
+    if (state && state.currentPage) {
+      this.currentPage = state.currentPage;
+    }
+    this.page(this.currentPage);
+
+    window.addEventListener("popstate", this.handlePopstate);
+  },
+  beforeDestroy() {
+    window.removeEventListener("popstate", this.handlePopstate);
+  },
+  beforeRouteLeave(to, from, next) {
+    // 将当前页码存储到浏览器的历史记录中
+    window.history.pushState({ currentPage: this.currentPage }, "");
+
+    next();
   },
 
   methods: {
     page(currentPage) {
-      const _this = this;
-      _this.$axios
-        .get("/article/articleList?currentPage=" + currentPage)
+      this.prevPage = this.currentPage;
+      this.currentPage = currentPage;
+      this.Articles();
+      // 将上一页的页码保存到浏览器历史中
+      // 保存当前页码到历史记录中
+      window.history.pushState(
+        {
+          prevPage: this.prevPage,
+          currentPage: this.currentPage,
+        },
+        ""
+      );
+    },
+    Articles() {
+      this.$axios
+        .get("/article/articleList?currentPage=" + this.currentPage)
         .then((res) => {
-          console.log(res);
-          _this.articles = res.data.data.articleRecords;
-          _this.currentPage = res.data.data.currentPage;
-          _this.total = res.data.data.total;
-          _this.pageSize = res.data.data.pageSize;
+          console.log("文章", res);
+          this.articles = res.data.data.articleRecords;
+          this.currentPage = res.data.data.currentPage;
+          this.total = res.data.data.total;
+          this.pageSize = res.data.data.pageSize;
           console.log("pageSize----------->", res.data.data.pageSize);
         });
     },
+    handlePopstate(event) {
+      if (event.state && event.state.currentPage && event.state.prevPage) {
+        this.currentPage = event.state.currentPage;
+        this.prevPage = event.state.prevPage;
+        this.Articles();
+      }
+    },
 
+    // 热门文章
     async getArticles() {
       this.loading = true;
       const count = 12;
@@ -174,9 +219,21 @@ export default {
           this.loading = false;
         });
     },
+
+    // 轮播图
+    getCarousel(type) {
+      this.$axios
+        .get("/carousel/getCarousel", { params: { type } })
+        .then((res) => {
+          this.carouselList = res.data.data;
+          console.log("轮播图res---------->", res.data.data);
+        });
+    },
   },
   created() {
-    this.page(1);
+    this.getCarousel(1);
+    //获取热门文章
+    this.getArticles();
   },
 
   filters: {

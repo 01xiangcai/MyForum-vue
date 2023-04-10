@@ -162,10 +162,10 @@ export default {
           this.showComments(this.question.id);
 
           _this.$message({
-                showClose: true,
-                message: res.data.msg,
-                type: "success",
-              });
+            showClose: true,
+            message: res.data.msg,
+            type: "success",
+          });
           this.comments = "";
         });
     },
@@ -209,9 +209,12 @@ export default {
 
         var result = md.render(question.description);
         _this.question.description = result;
-        _this.ownBlog = question.creator === _this.$store.getters.getUser.id;
-        _this.currentUser.avatar = _this.$store.getters.getUser.avatar;
-        _this.currentUser.username = _this.$store.getters.getUser.username;
+        if (_this.$store.getters.getUser) {
+          _this.ownBlog = question.creator === _this.$store.getters.getUser.id;
+          _this.currentUser.avatar = _this.$store.getters.getUser.avatar;
+          _this.currentUser.username = _this.$store.getters.getUser.username;
+        }
+
         return this.$axios.get("/user/" + question.creator);
       })
       .then((res) => {
@@ -220,11 +223,7 @@ export default {
         _this.user.id = user.id;
         _this.user.username = user.username;
       })
-      .catch((error) => {
-        _this.$alert("查询失败", "提示", {
-          confirmButtonText: "确定",
-        });
-      });
+      .catch((error) => {});
 
     this.showComments(parentId);
   },

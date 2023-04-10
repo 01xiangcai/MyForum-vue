@@ -13,6 +13,7 @@ import ArticleEdit from '../views/article/ArticleEdit'
 import ArticleDetail from '../views/article/ArticleDetail'
 import MyArticle from '../views/article/MyArticle'
 import CommentNotification from '../views/Notification/CommentNotification'
+import UserById from '../views/UserInfo/UserById'
 
 import MyTestIndex from '../views/test/MyTestIndex'
 
@@ -95,6 +96,12 @@ const routes = [
     name: 'ArticleDetail',
     component: ArticleDetail
   },
+  {
+    path: '/user/:userId',
+    name: 'UserById',
+    component:UserById
+  },
+
 
   {
     path: '/question/:questionId/edit',
